@@ -16,12 +16,39 @@ pub fn hex_to_base64(hex: &str) -> Result<String, Error> {
             return Err(Error::new(ErrorKind::InvalidInput, "Non-Hex Data"));
         }
         
-
         from = to;
         to = cmp::min(len, to + 2);
     }
 
     Ok(base64_encode(&bytes))
+}
+
+// challenge 2
+pub fn fixed_xor(a: &str, b: &str) -> Result<String, Error> {
+    if a.len() != b.len() {
+        return Err(Error::new(ErrorKind::InvalidInput, "Length Not Equal"));
+    }
+
+    let table = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+    let mut result = String::with_capacity(a.len());
+
+    for i in 0..a.len() {
+        let mut v = 0u8;
+        if let Ok(t) = u8::from_str_radix(&a[i..(i+1)], 16) {
+            v ^= t;
+        } else {
+            return Err(Error::new(ErrorKind::InvalidInput, "Non-Hex Data"));
+        }
+        if let Ok(t) = u8::from_str_radix(&b[i..(i+1)], 16) {
+            v ^= t;
+        } else {
+            return Err(Error::new(ErrorKind::InvalidInput, "Non-Hex Data"));
+        }
+
+        result.push(table[v as usize]);
+    }
+
+    Ok(result)
 }
 
 
@@ -35,4 +62,10 @@ mod test {
         assert_eq!(base64_value, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
     }
     
+    #[test]
+    fn test_fixed_xor() {
+        let a = "1c0111001f010100061a024b53535009181c";
+        let b = "686974207468652062756c6c277320657965";
+        assert_eq!(fixed_xor(a, b).unwrap(), "746865206b696420646f6e277420706c6179");
+    }
 }
