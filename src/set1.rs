@@ -61,6 +61,7 @@ pub fn fixed_xor(a: &str, b: &str) -> Result<String, Error> {
 // 其中高频字符有0x36(3次), 0x37(5次), 0x78(6次)
 // 0x36出现在倒数第二个字符, 0x37出现在倒数第一个字符,这些位置出现空格都是罕见或者不可能的
 // 于是我尝试用0x78作为加密后的空格来尝试解密,当在最前面几个字符中得到Cooking时,显然这就对了
+// BTW: Cooking MC's like a pound of bacon是Vanilla Ice在80年代的一首说唱歌曲Ice Ice Baby里的歌词
 
 
 #[cfg(test)]
