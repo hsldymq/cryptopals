@@ -1,5 +1,6 @@
 mod set1;
 
+use std::io::{Error, ErrorKind};
 
 pub fn base64_encode(bytes: &[u8]) -> String {
     let table = [
@@ -36,6 +37,14 @@ pub fn base64_encode(bytes: &[u8]) -> String {
     result.push_str(padding[bit_len % 6]);
     
     result
+}
+
+pub fn hex_to_u8(hex: &str) -> Result<u8, Error> {
+    if let Ok(t) = u8::from_str_radix(hex, 16) {
+        return Ok(t);
+    }
+
+    return Err(Error::new(ErrorKind::InvalidInput, "Non-Hex Data"));
 }
 
 
