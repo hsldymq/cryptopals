@@ -47,6 +47,17 @@ pub fn hex_to_u8(hex: &str) -> Result<u8, Error> {
     return Err(Error::new(ErrorKind::InvalidInput, "Non-Hex Data"));
 }
 
+pub fn repeat_xor_encrypt(plain: &[u8], key: &[u8]) -> Vec<u8> {
+    let mut result: Vec<u8> = Vec::new();
+
+    let key_size = key.len();
+    for (i, each) in plain.iter().enumerate() {
+        result.push(each ^ key[i % key_size]);
+    }
+
+    result
+}
+
 
 #[cfg(test)]
 mod test {
@@ -61,6 +72,12 @@ mod test {
         assert_eq!(base64_encode("foob".as_bytes()), "Zm9vYg==");
         assert_eq!(base64_encode("fooba".as_bytes()), "Zm9vYmE=");
         assert_eq!(base64_encode("foobar".as_bytes()), "Zm9vYmFy");
+    }
+
+    #[test]
+    fn test_repeat_xor_encrypt() {
+        let result = repeat_xor_encrypt("0123".as_bytes(), "ABC".as_bytes());
+        assert_eq!("qsqr", String::from_utf8(result).unwrap());
     }
 }
 
