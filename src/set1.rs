@@ -48,6 +48,12 @@ pub fn fixed_xor(a: &str, b: &str) -> Result<String, Error> {
 // Key: 0x58(X)
 // 加密文本: Cooking MC's like a pound of bacon 
 // BTW: Cooking MC's like a pound of bacon是Vanilla Ice在80年代的一首说唱歌曲Ice Ice Baby里的歌词
+// 思路:
+//  先统计出每个字节的值在流中出现的数量,出现次数最多的那个字节我认为是符合ETAOIN SHRDLU规律的
+//  但是这是一个统计规律,你不能说出现次数最多的字节就是字符E加密后的值
+//  所以我会依次将这个字节与ETAOIN SHRDLU的每个字符做异或来生成key,再用key去解密这个流
+//  在这里我有一个假设,假设原文是在ASCII字符范围的,所以当使用每个key来解密流后,得到的内容里包含了非ASCII的字符,我就认为是无效的并把它们,只输出剩下没有被忽略的
+//  这样可以减少需要判断的数量,最后就很容易直接通过肉眼来观察得到明文
 pub fn single_byte_xor_cipher(encrypted: &str) {
     let freq_letters = ['E', 'T', 'A', 'O', 'I', 'N', ' ', 'S', 'H', 'R', 'D', 'L', 'U'];
     let mut stat: HashMap<u8, usize> = HashMap::new();
@@ -102,6 +108,7 @@ pub fn single_byte_xor_cipher(encrypted: &str) {
 // Key: 0x35(5)
 // 被加密行: 7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f
 // 加密文本: Now that the party is jumping\n
+// 这里直接借用challenge 3的算法,输出疑似的有效字符串,然后肉眼观察结果.
 pub fn detect_single_character_xor() {
     let strings = [
         "0e3647e8592d35514a081243582536ed3de6734059001e3f535ce6271032",
