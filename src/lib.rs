@@ -58,6 +58,19 @@ pub fn repeat_xor_encrypt(plain: &[u8], key: &[u8]) -> Vec<u8> {
     result
 }
 
+// 计算两个字节的汉明距离
+pub fn hamming_distant(a: u8, b: u8) -> u8 {
+    let mut x = a ^ b;
+    let mut distant = 0u8;
+
+    while x > 0 {
+        distant += x & 1;
+        x >>= 1;
+    }
+
+    distant
+}
+
 
 #[cfg(test)]
 mod test {
@@ -78,6 +91,13 @@ mod test {
     fn test_repeat_xor_encrypt() {
         let result = repeat_xor_encrypt("0123".as_bytes(), "ABC".as_bytes());
         assert_eq!("qsqr", String::from_utf8(result).unwrap());
+    }
+
+    #[test]
+    fn test_hamming_distant() {
+        assert_eq!(hamming_distant(0x01, 0x07), 2);
+        assert_eq!(hamming_distant(5, 5), 0);
+        assert_eq!(hamming_distant(0xff, 0x00), 8);
     }
 }
 
