@@ -9,32 +9,53 @@ pub fn base64_encode(bytes: &[u8]) -> String {
         'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
         'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
     ];
-    let padding = ["", "", "==", "", "=", ""];
 
-    let mut hold = 0u8; 
-    let mut offset = 2; 
     let mut code: u8;
-
     let bit_len = bytes.len() * 8;
-    let mut result = String::with_capacity((bit_len + 5) / 6 + padding[bit_len % 6].len());
+    // bit_len始终是8的倍数,所以bit_len % 6只会有三种可能的值,0, 2, 4
+    // 其中0不需要padding, 2需要padding两个=, 4需要padding一个=
+    // 这里做了一个变换,将bit_len % 6的结果由4变为1,其他两个只保持不变,这样就正好跟padding的长度保持一致了.
+    let padding_len = ((-(bit_len as isize % 6 / 2) + 3) % 3) as usize;
+    let mut result = String::with_capacity(bit_len / 6 + padding_len);
 
-    for b in bytes {
-        code = hold | (b >> offset);
-        hold = (b << (6 - offset)) & 0b0011_1111u8;
-        offset += 2;
+    let iter_group = bit_len / 24;
+    let mut idx = 0;
+    for _ in 0..iter_group {
+        code = bytes[idx] >> 2;
         result.push(table[code as usize]);
 
-        if offset == 8 {
-            result.push(table[hold as usize]);
-            hold = 0;
-            offset = 2;
-        }
-    }
-    if hold > 0 {
-        result.push(table[hold as usize]);
+        code = (bytes[idx] << 4) & 0b0011_0000 | (bytes[idx + 1] >> 4);
+        result.push(table[code as usize]);
+
+        code = (bytes[idx + 1] << 2) & 0b0011_1100 | (bytes[idx + 2] >> 6);
+        result.push(table[code as usize]);
+
+        code = bytes[idx + 2] & 0b0011_1111;
+        result.push(table[code as usize]);
+
+        idx += 3;
     }
 
-    result.push_str(padding[bit_len % 6]);
+    if padding_len == 1 {
+        code = bytes[idx] >> 2;
+        result.push(table[code as usize]);
+
+        code = (bytes[idx] << 4) & 0b0011_0000 | (bytes[idx + 1] >> 4);
+        result.push(table[code as usize]);
+
+        code = (bytes[idx + 1] << 2) & 0b0011_1100;
+        result.push(table[code as usize]);
+
+        result.push_str("=");
+    } else if padding_len == 2 {
+        code = bytes[idx] >> 2;
+        result.push(table[code as usize]);
+
+        code = (bytes[idx] << 4) & 0b0011_0000;
+        result.push(table[code as usize]);
+
+        result.push_str("==");
+    }
     
     result
 }
