@@ -10,16 +10,14 @@ pub fn base64_encode(bytes: &[u8]) -> String {
         'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
     ];
 
-    let mut code: u8;
-    let bit_len = bytes.len() * 8;
-    // bit_len始终是8的倍数,所以bit_len % 6只会有三种可能的值,0, 2, 4
-    // 其中0不需要padding, 2需要padding两个=, 4需要padding一个=
-    // 这里做了一个变换,将bit_len % 6的结果由4变为1,其他两个只保持不变,这样就正好跟padding的长度保持一致了.
-    let padding_len = ((-(bit_len as isize % 6 / 2) + 3) % 3) as usize;
-    let mut result = String::with_capacity(bit_len / 6 + padding_len);
+    // 当输入的长度非3的倍数时,余1会padding两个等号,余2时会padding一个等号
+    let padding_len = ((-(bytes.len() as isize % 3) + 3) % 3) as usize;
+    // base64实际将字节流以3字节分组,装换为4字节分组的编码后的字符流
+    let mut result = String::with_capacity((bytes.len() + 3 - 1) / 3 * 4);
 
-    let iter_group = bit_len / 24;
+    let iter_group = bytes.len() / 3;
     let mut idx = 0;
+    let mut code: u8;
     for _ in 0..iter_group {
         code = bytes[idx] >> 2;
         result.push(table[code as usize]);
