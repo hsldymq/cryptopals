@@ -90,6 +90,23 @@ pub fn hamming_distant(a: u8, b: u8) -> u8 {
     distant
 }
 
+// 计算两个字符串的海明距离
+pub fn str_hamming_distant(s1: &str, s2: &str) -> Option<u32> {
+    let mut dist = 0u32;
+
+    if s1.len() != s2.len() {
+        return None;
+    }
+
+    let bytes1 = s1.as_bytes();
+    let bytes2 = s2.as_bytes();
+    for (i, b) in bytes1.iter().enumerate() {
+        dist += hamming_distant(*b, bytes2[i]) as u32;
+    }
+
+    Some(dist)
+}
+
 
 #[cfg(test)]
 mod test {
@@ -117,6 +134,12 @@ mod test {
         assert_eq!(hamming_distant(0x01, 0x07), 2);
         assert_eq!(hamming_distant(5, 5), 0);
         assert_eq!(hamming_distant(0xff, 0x00), 8);
+    }
+
+    #[test]
+    fn test_str_hamming_distant() {
+        assert_eq!(str_hamming_distant("this is a test", "wokka wokka!!!"), Some(37u32));
+        assert_eq!(str_hamming_distant("a", "ab"), None);
     }
 }
 
